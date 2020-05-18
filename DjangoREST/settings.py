@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # packages
     'safedelete',
+    'rest_framework'
 
     'api'
 ]
