@@ -40,9 +40,9 @@ INSTALLED_APPS = [
 
     # packages
     'safedelete',
-    'rest_framework'
+    'rest_framework',
 
-    'api'
+    'api',
 ]
 
 MIDDLEWARE = [
