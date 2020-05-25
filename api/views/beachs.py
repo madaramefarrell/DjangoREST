@@ -4,17 +4,10 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 from ..models.beach import Beach
+from rest_framework import status
 
 
-class BeachListView(viewsets.ReadOnlyModelViewSet):
-
-
-    def get_queryset(self):
-        queryset = get_list_or_404(Beach)
-        return queryset
-    def get_serializer_class(self):
-        serializer_class = serializers.BeachListSerializer
-        return serializer_class
+class BeachListView(viewsets.ModelViewSet):
 
     # Use GET method "/api/beach"
     # Respond beach list information
@@ -22,13 +15,24 @@ class BeachListView(viewsets.ReadOnlyModelViewSet):
     # Respond beach detail information
 
     def list(self, request, *args, **kwargs):
-        id = request.query_params.get('id', None)
-        queryset = self.get_queryset()
-
-        if id is not None:
-            queryset = get_list_or_404(Beach, id=id)
-            serialized_data = serializers.BeachDetailSerializer(queryset, many=True)
+        postion = request.query_params.get('postion', None)
+        if postion is None:
+            queryset = get_list_or_404(Beach)
         else:
-            serialized_data = self.get_serializer(queryset, many=True)
+            queryset = get_list_or_404(Beach, location=postion)
 
-        return Response(serialized_data.data)
+        serialized = serializers.BeachListSerializer(queryset, many=True)
+        return Response(serialized.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = get_object_or_404(Beach, pk=pk)
+        serialized = serializers.BeachDetailSerializer(queryset)
+        return Response(serialized.data)
+
+    def update(self, request, pk=None):
+        queryset = Beach.objects.get(pk=pk)
+        serialized = serializers.BeachDetailSerializer(queryset, data=request.data)
+        if serialized.is_valid():
+            serialized.save()
+            return Response(serialized.data)
+        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
